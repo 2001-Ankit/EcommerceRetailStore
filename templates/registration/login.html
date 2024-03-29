@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+        <!-- Login Start -->
+        <div class="login">
+            <div class="container-fluid">
+                     <form method="POST">
+                        {% csrf_token %}
+                <div class="row">
+                    <div class="col-lg-6">
+                         <h1>Log in</h1>
+                        <div class="login-form">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label>E-mail / Username</label>
+                                   {{form.username}}
+                                </div>
+                                <div class="col-md-6">
+                                    <label>Password</label></br>
+                                    {{form.password}}
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="custom-control custom-checkbox">
+                                        <input type="checkbox" class="custom-control-input" id="newaccount">
+                                        <label class="custom-control-label" for="newaccount">Keep me signed in</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <button type="submit" class="btn">Submit</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                         </form>
+
+            </div>
+        </div>
+        <!-- Login End -->
+{% endblock %}
