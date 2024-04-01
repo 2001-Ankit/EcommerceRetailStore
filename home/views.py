@@ -170,3 +170,20 @@ def delete_cart(request, slug):
     return redirect('/cart')
 
 
+class CheckoutView(BaseView):
+    def get(self, request):
+        self.context
+        self.context['checkout_views'] = Cart.objects.filter(username=request.user.username, checkout=False)
+        count = 0
+        total_price = 0
+        for i in Cart.objects.filter(username=request.user.username, checkout=False):
+            x = Cart.objects.filter(username=request.user.username, checkout=False)[count].total
+            total_price = total_price + x
+            count = count + 1
+        self.context['total_price'] = total_price
+        return render(request, 'checkout.html', self.context)
+
+def checkout(request):
+    username = request.user.username
+    Cart.objects.filter(username=username,checkout=False).update(checkout=True)
+    return redirect('/cart')
