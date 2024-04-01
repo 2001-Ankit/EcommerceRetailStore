@@ -1,6 +1,8 @@
+from django.contrib.auth.models import User
 from django.db import models
 from django.shortcuts import redirect
 from django.template.defaultfilters import slugify
+from django.utils import timezone
 
 
 # Create your models here.
@@ -128,5 +130,28 @@ class Cart(models.Model):
 
     def __str__(self):
         return self.username
+
+
+class Contact(models.Model):
+    name = models.CharField(max_length=100)
+    email = models.EmailField(max_length=100)
+    subject = models.CharField(max_length=400)
+    message = models.TextField(max_length=1000)
+
+    def __str__(self):
+        return self.name
+
+class WishList(models.Model):
+    username = models.OneToOneField(User,on_delete=models.CASCADE)
+    slug = models.SlugField(blank=True,unique=False)
+    items = models.ManyToManyField(Product)
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.username)
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.username
+
 
 

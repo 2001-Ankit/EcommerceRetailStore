@@ -3,6 +3,7 @@ from http.client import HTTPResponse
 from django.contrib.auth import logout
 from django.contrib.auth.models import User
 from django.contrib import messages
+from django.core.mail import send_mail
 from django.shortcuts import render, redirect
 from django.views.generic import View
 from .models import *
@@ -97,8 +98,10 @@ def signup(request):
             return redirect('/signup')
     return render(request,'signup.html')
 
+from django.views.decorators.http import require_POST
+
+@require_POST
 def logout_view(request):
-    logout(request)
 
     return redirect('/')
 
@@ -187,3 +190,63 @@ def checkout(request):
     username = request.user.username
     Cart.objects.filter(username=username,checkout=False).update(checkout=True)
     return redirect('/cart')
+
+
+class ProductListView(BaseView):
+    def get(self,request):
+        self.context
+
+        return render(request,'product-list.html',self.context)
+
+def contact(request):
+    if request.Method == "POST":
+        name = request.POST['name']
+        email = request.POST['email']
+        subject = request.POST['subject']
+        message = request.POST['message']
+        Contact.objects.create(
+            name = name,
+            email = email,
+            subject = subject,
+            message = message
+        ).save()
+        send_mail(
+            "Form submitted",
+            f"Hello {name} having email {email}. I am very glad to say that your query will be replayed soon.",
+            "from@example.com",
+            [email],
+            fail_silently=False,
+        )
+    return render(request,'contact.html')
+
+class WishView(BaseView):
+    def get(self,request):
+        username = request.user.username
+        wish_items = WishList.objects.filter(username=username)
+        self.context['wish_items'] = wish_items
+
+        return render(request,'wishlist.html',self.context)
+
+def add_to_wishlist(slug,request):
+    username = request.user.username
+    items = Product.object.get(slug=slug)
+    if not WishList.objects.filter(username=username, items=items).exists():
+        wishlist_item = WishList(username=username, items=items)
+        wishlist_item.save()
+        messages.success(request,'Product added to wishlist successfully')
+    else:
+        messages.success(request,"Product already exists in wishlist")
+
+    return redirect('/wishlist')
+
+
+def remove_form_wishlist(request,slug):
+    username = request.user.username
+    items = Product.objects.filter(slug=slug)
+    wishlistitem = WishList.objects.filter(username=username,items=items).exists()
+    if wishlistitem.exists():
+        wishlistitem.delete()
+        messages.success("Removed Successfully")
+    else:
+        messages.error("Product doesnot exist in wishlist")
+    return redirect('/wishlist')
