@@ -221,32 +221,37 @@ def contact(request):
 
 class WishView(BaseView):
     def get(self,request):
-        username = request.user.username
-        wish_items = WishList.objects.filter(username=username)
+        self.context
+        wish_items = WishList.objects.filter(username=request.user)
         self.context['wish_items'] = wish_items
 
         return render(request,'wishlist.html',self.context)
 
-def add_to_wishlist(slug,request):
-    username = request.user.username
-    items = Product.object.get(slug=slug)
-    if not WishList.objects.filter(username=username, items=items).exists():
-        wishlist_item = WishList(username=username, items=items)
-        wishlist_item.save()
-        messages.success(request,'Product added to wishlist successfully')
+from django.contrib import messages
+from django.shortcuts import redirect
+from .models import WishList, Product
+
+def add_to_wishlist(request, slug):
+    username = request.user
+    items = Product.objects.get(slug=slug)
+    wishlist, created = WishList.objects.get_or_create(username=username)
+    if not wishlist.items.filter(slug=slug).exists():
+        wishlist.items.set([items])
+        messages.success(request, 'Product added to wishlist successfully')
     else:
-        messages.success(request,"Product already exists in wishlist")
+        messages.success(request, 'Product already exists in wishlist')
 
     return redirect('/wishlist')
 
 
 def remove_form_wishlist(request,slug):
-    username = request.user.username
+    username = request.user
     items = Product.objects.filter(slug=slug)
-    wishlistitem = WishList.objects.filter(username=username,items=items).exists()
+    wishlistitem = WishList.objects.filter(username=username,items=items)
     if wishlistitem.exists():
         wishlistitem.delete()
         messages.success("Removed Successfully")
     else:
         messages.error("Product doesnot exist in wishlist")
     return redirect('/wishlist')
+
