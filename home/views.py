@@ -6,6 +6,8 @@ from django.contrib import messages
 from django.core.mail import send_mail
 from django.shortcuts import render, redirect
 from django.views.generic import View
+from rest_framework import viewsets
+
 from .models import *
 
 # Create your views here.
@@ -255,3 +257,22 @@ def remove_form_wishlist(request,slug):
         messages.error("Product doesnot exist in wishlist")
     return redirect('/wishlist')
 
+
+
+### API Views###
+from .serializers import *
+from rest_framework import generics
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import SearchFilter
+from rest_framework.filters import OrderingFilter
+class ProductViewSet(viewsets.ModelViewSet):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+
+class ProductFilterViewSet(generics.ListAPIView):
+    queryset = Product.objects.filter(labels='hot')
+    serializer_class = ProductSerializer
+    filter_backends = [DjangoFilterBackend,SearchFilter,OrderingFilter]
+    filterset_fields = ['category','sub_category','brand','stock','labels']
+    search_fields = ['name','brand','category']
+    ordering_fields = ['price','discounted_price','id']
