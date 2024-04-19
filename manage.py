@@ -19,8 +19,15 @@ def main():
 import os
 from dotenv import load_dotenv
 
+
 # Load environment variables from .env file
 load_dotenv()
+
+# Set the DJANGO_SETTINGS_MODULE environment variable
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'Retail.settings')
+
+# Replace 'my_project.settings' with the actual Python import path of your Django project's settings.
+
 
 if __name__ == '__main__':
     main()
